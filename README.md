@@ -4,6 +4,9 @@
 espacio vectorial de 768 dimensiones.** Una sola colección, una sola consulta, todas las
 modalidades en el mismo ranking.
 
+![texto del vínculo](https://www.shutterstock.com/image-photo/online-education-concept-2020-banner-260nw-1734035627.jpg)
+
+
 **Un motor de conocimiento empresarial multimodal, económico y local-first**, capaz de
 convertir información dispersa en una memoria semántica consultable. Todo el camino de la
 información —embeddings, visión, transcripción e índice— corre en el equipo: los documentos
