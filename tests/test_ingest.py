@@ -15,7 +15,6 @@ import pytest
 
 from src import config, ingest
 
-
 # ------------------------------------------------------------------ extensión
 
 
@@ -69,7 +68,9 @@ def test_text_chunks_respeta_el_solape():
     assert len(chunks) > 1
     assert all(len(chunk) <= 10 for chunk in chunks)
     # Cada trozo comparte exactamente `overlap` caracteres con el siguiente.
-    for anterior, siguiente in zip(chunks, chunks[1:]):
+    # `strict=False` a proposito: las dos listas estan desfasadas una posicion, no
+    # alineadas, asi que la ultima no tiene pareja.
+    for anterior, siguiente in zip(chunks, chunks[1:], strict=False):
         assert anterior[-3:] == siguiente[:3]
 
 
@@ -91,7 +92,11 @@ def test_stable_id_cambia_con_el_sufijo(tmp_path):
 
 def test_display_text_prioriza_el_documento():
     """Si hay texto extraído, es lo que ve el LLM — aunque sea una foto o un audio."""
-    metadata = {"modality": "audio", "name": "1-116765-A-41.wav", "_document": "sonido ambiental: chainsaw"}
+    metadata = {
+        "modality": "audio",
+        "name": "1-116765-A-41.wav",
+        "_document": "sonido ambiental: chainsaw",
+    }
     assert ingest._display_text(metadata, {"audio": "x.wav"}) == "sonido ambiental: chainsaw"
 
 

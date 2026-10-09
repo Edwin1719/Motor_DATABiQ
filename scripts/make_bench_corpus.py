@@ -23,6 +23,14 @@ import json
 import shutil
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+# numpy y PIL se importan DENTRO de cada generador: cargarlos a nivel de módulo haría
+# que este script no arrancara sin ellos, y `--help` no debería exigir dependencias.
+# Con `TYPE_CHECKING` las anotaciones de tipo siguen siendo ciertas para el linter
+# (ruff: F821) sin pagar el import en tiempo de ejecución.
+if TYPE_CHECKING:
+    import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -43,7 +51,7 @@ SEED = 20261009
 # --------------------------------------------------------------------------- audio
 
 
-def _audio_items() -> tuple[dict[str, "np.ndarray"], "np.random.Generator"]:
+def _audio_items() -> tuple[dict[str, np.ndarray], np.random.Generator]:
     """Cinco patrones de onda, cada uno con una propiedad acústica que lo distingue.
 
     Se generan como muestras crudas: no se descarga ningún archivo de audio. Devuelve

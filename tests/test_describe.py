@@ -19,7 +19,6 @@ import pytest
 
 from src import config, describe
 
-
 # ------------------------------------------------------------------ activación
 
 
@@ -297,7 +296,9 @@ def test_describe_video_reparte_los_segmentos_por_su_punto_medio(monkeypatch, tm
 def test_describe_video_sin_audio_no_inventa_texto(monkeypatch, tmp_path):
     """Un video mudo no tiene nada que transcribir: se quedará en encontrable."""
     _prepara_video(monkeypatch)
-    monkeypatch.setattr(describe.video, "audio_16k_mono", lambda ruta: np.zeros(0, dtype=np.float32))
+    monkeypatch.setattr(
+        describe.video, "audio_16k_mono", lambda ruta: np.zeros(0, dtype=np.float32)
+    )
 
     assert describe.describe_video(tmp_path / "mudo.mp4") == {}
 

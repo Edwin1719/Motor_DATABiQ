@@ -13,7 +13,13 @@ import pytest
 from src import config, rag
 
 
-def hit(modality: str = "pdf", name: str = "paper.pdf", similarity: float = 0.7, document: str = "contenido", **extra):
+def hit(
+    modality: str = "pdf",
+    name: str = "paper.pdf",
+    similarity: float = 0.7,
+    document: str = "contenido",
+    **extra,
+):
     return {
         "id": "x",
         "similarity": similarity,

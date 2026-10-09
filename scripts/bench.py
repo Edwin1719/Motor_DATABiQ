@@ -179,16 +179,16 @@ def _ingerir_texto(archivos: list[Path], etiquetas: dict[str, str]) -> dict:
     """
     from src import embedder, ingest, store
 
-    guardadas_por_archivo = {
-        str(p.resolve()): store.metadatos_por_ruta(p) for p in archivos
-    }
+    guardadas_por_archivo = {str(p.resolve()): store.metadatos_por_ruta(p) for p in archivos}
 
     items: list[tuple[str, object, dict]] = []
     for path in archivos:
         guardadas = guardadas_por_archivo[str(path.resolve())]
         # La huella se calcula aquí porque `_collect` la necesita para decidir si el
         # ítem sigue intacto, y en la rama de texto la calcula sobre el fragmento.
-        for index, chunk in enumerate(ingest.text_chunks(path.read_text(encoding="utf-8", errors="replace"))):
+        for index, chunk in enumerate(
+            ingest.text_chunks(path.read_text(encoding="utf-8", errors="replace"))
+        ):
             item_id = ingest._stable_id(path, f"#{index}")
             huella = ingest._huella(ingest._version(path), chunk)
             if ingest._intacto(guardadas, item_id, huella):
@@ -223,9 +223,7 @@ def _ingerir_texto(archivos: list[Path], etiquetas: dict[str, str]) -> dict:
             store.add_items(
                 ids=[meta["id"]],
                 embeddings=vectores[posicion : posicion + 1],
-                metadatas=[
-                    {k: v for k, v in meta.items() if k != "id" and not k.startswith("_")}
-                ],
+                metadatas=[{k: v for k, v in meta.items() if k != "id" and not k.startswith("_")}],
                 documents=[ingest._display_text(meta, payload)],
             )
             guardados += 1
@@ -236,7 +234,7 @@ def _ingerir_texto(archivos: list[Path], etiquetas: dict[str, str]) -> dict:
 
 
 def evaluar(*, top_k: int, resetear: bool) -> dict:
-    from src import rag, store
+    from src import rag
 
     corpus = preparar_indice(resetear=resetear, reindexar=True)
     banco = leer_consultas()
@@ -273,7 +271,9 @@ def evaluar(*, top_k: int, resetear: bool) -> dict:
         # es el suelo contra el que se mide una consulta fuera de alcance. Con `top_k`
         # fragmentos recuperados, el último es el peor de esa consulta.
         if similitudes:
-            positivas_peor = similitudes[-1] if positivas_peor is None else min(positivas_peor, similitudes[-1])
+            positivas_peor = (
+                similitudes[-1] if positivas_peor is None else min(positivas_peor, similitudes[-1])
+            )
 
         detalle.append(
             {
@@ -346,12 +346,18 @@ def imprimir(resultado: dict, *, min_recall3: float) -> int:
     )
     if corpus["errors"]:
         print(f"ERRORES DE INGESTA: {corpus['errors']}")
-    print(f"consultas: {resultado['consultas_positivas']} con respuesta · {resultado['consultas_negativas']} fuera de alcance")
+    print(
+        f"consultas: {resultado['consultas_positivas']} con respuesta · {resultado['consultas_negativas']} fuera de alcance"
+    )
 
     recall = resultado["recall"]
-    print(f"\nRecall@1={recall['@1']:.2f}  @3={recall['@3']:.2f}  @5={recall['@5']:.2f}  @10={recall['@10']:.2f}")
+    print(
+        f"\nRecall@1={recall['@1']:.2f}  @3={recall['@3']:.2f}  @5={recall['@5']:.2f}  @10={recall['@10']:.2f}"
+    )
     print(f"MRR={resultado['mrr']:.3f}")
-    print(f"latencia: mediana {resultado['latencia_mediana']} s · p90 {resultado['latencia_p90']} s")
+    print(
+        f"latencia: mediana {resultado['latencia_mediana']} s · p90 {resultado['latencia_p90']} s"
+    )
 
     print("\n--- consultas con respuesta conocida ---")
     fallos = []
@@ -368,18 +374,22 @@ def imprimir(resultado: dict, *, min_recall3: float) -> int:
     print("\n--- consultas fuera de alcance ---")
     for caso in resultado["negativas"]:
         estado = "OK " if caso["por_debajo_de_lo_peor_positivo"] else "MAL"
-        print(f"[{estado}] mejor={caso['mejor_similitud']:.4f}  {caso['id']:<28} top1={caso['top1'][:40]}")
+        print(
+            f"[{estado}] mejor={caso['mejor_similitud']:.4f}  {caso['id']:<28} top1={caso['top1'][:40]}"
+        )
 
     print("\n" + "=" * 78)
     separacion = all(c["por_debajo_de_lo_peor_positivo"] for c in resultado["negativas"])
     peor_pos = resultado["peor_similitud_positiva"]
     mejor_neg = max((c["mejor_similitud"] for c in resultado["negativas"]), default=0.0)
-    print(f"Separacion: peor positiva={peor_pos} · mejor negativa={mejor_neg} -> {'SEPARA' if separacion else 'NO SEPARA'}")
+    print(
+        f"Separacion: peor positiva={peor_pos} · mejor negativa={mejor_neg} -> {'SEPARA' if separacion else 'NO SEPARA'}"
+    )
     print(f"Recall@3 real {recall['@3']:.2f} contra umbral {min_recall3:.2f}")
 
     codigo = 0
     if recall["@3"] is None or recall["@3"] < min_recall3:
-        print(f"\nRESULTADO: FALLA. Recall@3 por debajo del umbral.")
+        print("\nRESULTADO: FALLA. Recall@3 por debajo del umbral.")
         codigo = 1
     if not separacion:
         print(
@@ -394,14 +404,20 @@ def imprimir(resultado: dict, *, min_recall3: float) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Banco de validación del RAG multimodal.")
-    parser.add_argument("--top-k", type=int, default=10, help="fragmentos a recuperar (por defecto 10)")
-    parser.add_argument("--min-recall3", type=float, default=0.8, help="umbral de Recall@3 para pasar")
+    parser.add_argument(
+        "--top-k", type=int, default=10, help="fragmentos a recuperar (por defecto 10)"
+    )
+    parser.add_argument(
+        "--min-recall3", type=float, default=0.8, help="umbral de Recall@3 para pasar"
+    )
     parser.add_argument(
         "--reset",
         action="store_true",
         help="borra el índice del banco antes de medir (solo tras cambiar el corpus o EMBED_DIM)",
     )
-    parser.add_argument("--json", type=Path, default=None, help="escribe el resultado completo en JSON")
+    parser.add_argument(
+        "--json", type=Path, default=None, help="escribe el resultado completo en JSON"
+    )
     args = parser.parse_args()
 
     resultado = evaluar(top_k=args.top_k, resetear=args.reset)

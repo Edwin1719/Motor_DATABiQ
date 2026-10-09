@@ -125,12 +125,12 @@ def audio_16k_mono(path: str | Path) -> np.ndarray:
     from scipy.signal import resample_poly
 
     divisor = gcd(nativo, 16000)
-    return np.asarray(
-        resample_poly(mono, 16000 // divisor, nativo // divisor), dtype=np.float32
-    )
+    return np.asarray(resample_poly(mono, 16000 // divisor, nativo // divisor), dtype=np.float32)
 
 
-def chunks(duracion: float, segundos: float, minimo: float = MIN_CHUNK_SECONDS) -> list[tuple[float, float]]:
+def chunks(
+    duracion: float, segundos: float, minimo: float = MIN_CHUNK_SECONDS
+) -> list[tuple[float, float]]:
     """Parte la duración en tramos `(inicio, fin)` de `segundos` como máximo.
 
     El último tramo, si queda por debajo de `minimo`, se une al anterior: un

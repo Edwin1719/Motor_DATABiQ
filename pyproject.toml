@@ -1,11 +1,11 @@
 [project]
-name = "embeddinggemma2-mmrag"
+name = "motor-databiq"
 version = "0.1.0"
-description = "RAG multimodal local-first: una sola colección de 768 dimensiones para texto, imagen, audio, PDF y video"
+description = "Un motor de conocimiento empresarial multimodal, económico y local-first: PDFs, fotos, audios y videos en un solo índice, cero OCR"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { file = "LICENSE" }
-keywords = ["rag", "multimodal", "embeddings", "local-first", "chroma", "streamlit"]
+keywords = ["rag", "multimodal", "local-first", "embeddings", "chroma", "streamlit", "knowledge-management"]
 classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -19,7 +19,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/USUARIO/Embedding_Gemma2"
+Homepage = "https://github.com/Edwin1719/Motor_DATABiQ"
+Repository = "https://github.com/Edwin1719/Motor_DATABiQ"
+Issues = "https://github.com/Edwin1719/Motor_DATABiQ/issues"
 
 # ----------------------------------------------------------------------------- pytest
 [tool.pytest.ini_options]

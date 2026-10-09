@@ -70,9 +70,14 @@ def metadatos_por_ruta(path: str | Path) -> dict[str, dict[str, Any]]:
     su vector tampoco puede haber cambiado y no hace falta volver a prepararlo.
     """
     crudo = get_collection().get(where={"path": str(path)})
+    # `strict=True`: Chroma devuelve las tres listas alineadas por construcción. Si alguna
+    # vez no lo hiciera, quiero un error aquí y no metadatos asociados al id equivocado,
+    # que es la clase de fallo que hace que el sistema mienta sin fallar.
     return {
         item_id: (metadata or {})
-        for item_id, metadata in zip(crudo.get("ids") or [], crudo.get("metadatas") or [])
+        for item_id, metadata in zip(
+            crudo.get("ids") or [], crudo.get("metadatas") or [], strict=True
+        )
     }
 
 
@@ -107,6 +112,7 @@ def inventory() -> list[dict[str, Any]]:
             crudo.get("ids") or [],
             crudo.get("metadatas") or [],
             crudo.get("documents") or [],
+            strict=True,
         )
     ]
 
@@ -148,7 +154,9 @@ def search(
             "metadata": metadata or {},
             "document": document or "",
         }
-        for item_id, metadata, document, distance in zip(ids, metadatas, documents, distances)
+        for item_id, metadata, document, distance in zip(
+            ids, metadatas, documents, distances, strict=True
+        )
     ]
 
 

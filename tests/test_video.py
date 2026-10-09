@@ -233,7 +233,9 @@ def test_un_fragmento_intacto_no_se_decodifica(tmp_path, monkeypatch, clip, fres
     monkeypatch.setattr(
         ingest.video,
         "frames",
-        lambda *args, **kwargs: decodificados.append(args) or np.zeros((1, 4, 4, 3), dtype=np.uint8),
+        lambda *args, **kwargs: (
+            decodificados.append(args) or np.zeros((1, 4, 4, 3), dtype=np.uint8)
+        ),
     )
     monkeypatch.setattr(
         ingest.embedder,
@@ -241,9 +243,7 @@ def test_un_fragmento_intacto_no_se_decodifica(tmp_path, monkeypatch, clip, fres
         lambda items, **kwargs: np.ones((len(items), config.EMBED_DIM), dtype="float32"),
     )
 
-    primero = ingest.ingest_paths(
-        [clip], labels={"clip.mp4#v1": "uno", "clip.mp4#v2": "dos"}
-    )
+    primero = ingest.ingest_paths([clip], labels={"clip.mp4#v1": "uno", "clip.mp4#v2": "dos"})
     assert (primero["ingested"], primero["intact"]) == (2, 0)
     assert len(decodificados) == 2
 

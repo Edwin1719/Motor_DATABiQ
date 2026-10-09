@@ -14,7 +14,7 @@ import streamlit as st
 
 from src import config, describe, embedder, ingest, rag, store
 
-st.set_page_config(page_title="RAG EmbeddingGemma 2", page_icon="🔎", layout="wide")
+st.set_page_config(page_title="Motor DATABiQ", page_icon="🔎", layout="wide")
 
 MODALITIES = {
     "Todas": None,
@@ -45,14 +45,20 @@ def _warm_up():
     return embedder.get_model()
 
 
-def _formulario(clave: str, verbo: str, con_top_k: bool = False) -> tuple[bool, str, str | None, int]:
+def _formulario(
+    clave: str, verbo: str, con_top_k: bool = False
+) -> tuple[bool, str, str | None, int]:
     """Consulta + filtro de modalidad. `clave` aísla los widgets entre pestañas.
 
     Con `con_top_k` añade cuántos fragmentos recuperar: en modo recuperación no hay capa
     de generación que pague por ellos, así que se puede mirar más ancho.
     """
     with st.form(f"form_{clave}"):
-        if con_top_k:
+        # NO convertir esto a ternario: es la convención de la casa (ver el docstring del
+        # módulo). Un ternario con llamadas `st.*` evalúa ambas ramas y el DeltaGenerator
+        # de la no usada se filtra a la salida. Ruff sugiere SIM108 aquí; se ignora a
+        # conciencia y el `noqa` documenta por qué.
+        if con_top_k:  # noqa: SIM108
             columnas = st.columns([4, 1, 1])
         else:
             columnas = st.columns([4, 1])
@@ -489,7 +495,7 @@ with st.sidebar:
 
 
 # ------------------------------------------------------------------- principal
-st.title("RAG EmbeddingGemma 2")
+st.title("Motor DATABiQ")
 st.caption(
     "EmbeddingGemma 2 proyecta las cuatro modalidades en el mismo espacio de 768 "
     "dimensiones; el modelo de lenguaje lee los fragmentos recuperados."
@@ -595,7 +601,9 @@ with tab_recuperar:
             elegido = st.selectbox(
                 "Ver el fragmento",
                 range(len(hits)),
-                format_func=lambda posicion: f"{posicion + 1}. {hits[posicion]['metadata']['name']}",
+                format_func=lambda posicion: (
+                    f"{posicion + 1}. {hits[posicion]['metadata']['name']}"
+                ),
                 key="find_elegido",
             )
             with st.container(border=True):

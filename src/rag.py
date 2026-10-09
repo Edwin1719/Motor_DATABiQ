@@ -45,7 +45,9 @@ def build_context(hits: list[dict]) -> str:
     blocks = []
     for position, hit in enumerate(hits, start=1):
         meta = hit["metadata"]
-        header = f"[{position}] modalidad={meta.get('modality', '?')} · archivo={meta.get('name', '?')}"
+        header = (
+            f"[{position}] modalidad={meta.get('modality', '?')} · archivo={meta.get('name', '?')}"
+        )
         if meta.get("page"):
             header += f" · página={meta['page']}"
         header += f" · similitud={hit['similarity']:.4f}"

@@ -35,8 +35,24 @@ AUDIO_EXT = {".wav", ".mp3", ".flac", ".ogg", ".m4a", ".aac"}
 VIDEO_EXT = {".mp4", ".mov", ".mkv", ".webm", ".avi"}
 PDF_EXT = {".pdf"}
 TEXT_EXT = {
-    ".txt", ".md", ".markdown", ".rst", ".py", ".js", ".ts", ".tsx", ".jsx",
-    ".json", ".yaml", ".yml", ".toml", ".csv", ".html", ".css", ".sql", ".java",
+    ".txt",
+    ".md",
+    ".markdown",
+    ".rst",
+    ".py",
+    ".js",
+    ".ts",
+    ".tsx",
+    ".jsx",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".csv",
+    ".html",
+    ".css",
+    ".sql",
+    ".java",
 }
 
 TEXT_CHUNK = 1200
@@ -66,7 +82,7 @@ def modality_of(path: Path) -> str | None:
 
 def _stable_id(path: Path, suffix: str = "") -> str:
     """Hash estable del origen: reingerir el mismo archivo actualiza, no duplica."""
-    digest = hashlib.sha1(f"{path.resolve()}{suffix}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(f"{path.resolve()}{suffix}".encode()).hexdigest()
     return digest[:32]
 
 
@@ -80,7 +96,7 @@ def _version(path: Path) -> str:
     Cualquier edición real cambia el tamaño o la fecha.
     """
     stat = path.stat()
-    return hashlib.sha1(f"{stat.st_size}:{stat.st_mtime_ns}".encode("utf-8")).hexdigest()[:8]
+    return hashlib.sha1(f"{stat.st_size}:{stat.st_mtime_ns}".encode()).hexdigest()[:8]
 
 
 def _cache_prefix(path: Path) -> str:
@@ -100,7 +116,7 @@ def _huella(version: str, texto: str) -> str:
     vector es el texto. Así que una huella igual significa vector igual, y reindexar
     deja de costar 40 s cuando solo se corrigió una pieza.
     """
-    return hashlib.sha1(f"{version}|{texto}".encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha1(f"{version}|{texto}".encode()).hexdigest()[:16]
 
 
 def _intacto(guardadas: Mapping[str, dict], item_id: str, huella: str) -> bool:
@@ -496,8 +512,7 @@ def ingest_paths(
     ids = [items[i][2]["id"] for i in keep]
     # `id` y la clave interna DOCUMENT no se guardan en el payload de Chroma.
     metadatas = [
-        {k: v for k, v in items[i][2].items() if k != "id" and not k.startswith("_")}
-        for i in keep
+        {k: v for k, v in items[i][2].items() if k != "id" and not k.startswith("_")} for i in keep
     ]
     documents = [_display_text(items[i][2], items[i][1]) for i in keep]
 

@@ -31,9 +31,7 @@ from src import config, ingest, store  # noqa: E402
 HEADERS = {"User-Agent": "Mozilla/5.0"}  # arXiv bloquea el agente por defecto
 ESC50_RAW = "https://raw.githubusercontent.com/karolpiczak/ESC-50/master"
 FLICKR_REPO = "nlphuji/flickr_1k_test_image_text_retrieval"
-FLICKR_ZIP = (
-    f"https://huggingface.co/datasets/{FLICKR_REPO}/resolve/main/images_flickr_1k_test.zip"
-)
+FLICKR_ZIP = f"https://huggingface.co/datasets/{FLICKR_REPO}/resolve/main/images_flickr_1k_test.zip"
 
 
 def fetch(url: str, destination: Path) -> Path:
@@ -122,7 +120,9 @@ def document_labels() -> dict[str, str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Indexa datos demo.")
-    parser.add_argument("--images", type=int, default=0, help="cuántas fotos de Flickr1k (0 = ninguna)")
+    parser.add_argument(
+        "--images", type=int, default=0, help="cuántas fotos de Flickr1k (0 = ninguna)"
+    )
     parser.add_argument("--audio", type=int, default=12, help="cuántos clips de ESC-50")
     parser.add_argument("--no-pdf", action="store_true", help="omitir el PDF de ejemplo")
     parser.add_argument("--reset", action="store_true", help="borrar el índice antes de cargar")

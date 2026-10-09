@@ -1,11 +1,13 @@
-# RAG EmbeddingGemma 2
+# Motor DATABiQ
 
-**RAG multimodal donde texto, imágenes, audio, video y páginas de PDF comparten un mismo
-espacio vectorial de 768 dimensiones.** Una sola colección, una sola consulta, todas las
-modalidades en el mismo ranking.
+**Un motor de conocimiento empresarial multimodal, económico y local-first.** PDFs,
+fotografías, notas de voz y videos en una sola memoria semántica que responde en lenguaje
+natural, **cita de dónde lo sacó** y **se niega cuando no lo sabe**.
 
 ![texto del vínculo](https://weaviate.io/assets/images/hero-e3172d1fe79d9fab2e591bbb8b769ce3.png)
 
+Convierte PDFs, fotos, audios y videos en una memoria consultable: **un solo índice
+vectorial, cero OCR, todo en tu equipo.**
 
 **Un motor de conocimiento empresarial multimodal, económico y local-first**, capaz de
 convertir información dispersa en una memoria semántica consultable. Todo el camino de la
@@ -13,12 +15,35 @@ información —embeddings, visión, transcripción e índice— corre en el equ
 no salen de la máquina, y al modelo externo solo viajan los fragmentos que la búsqueda
 consideró relevantes.
 
+[![tests](https://github.com/Edwin1719/Motor_DATABiQ/actions/workflows/ci.yml/badge.svg)](https://github.com/Edwin1719/Motor_DATABiQ/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
-![Modelo](https://img.shields.io/badge/modelo-embeddinggemma--2-4285F4?logo=google&logoColor=white)
 ![Chroma](https://img.shields.io/badge/vector%20DB-Chroma-FF6B6B)
 ![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
 ![GPU](https://img.shields.io/badge/GPU-CUDA%2013.0-76B900?logo=nvidia&logoColor=white)
-![Licencia del modelo](https://img.shields.io/badge/licencia%20del%20modelo-Apache%202.0-blue)
+![Licencia](https://img.shields.io/badge/licencia-MIT-blue)
+
+## Qué lo hace distinto
+
+Cinco modalidades —texto, imagen, audio, PDF y video— **comparten un mismo espacio
+vectorial de 768 dimensiones**. Una sola colección, una sola consulta, todas las
+modalidades en el mismo ranking.
+
+Todo el camino de la información —embeddings, visión, transcripción e índice— **corre en
+el equipo**: los documentos no salen de la máquina, y al modelo externo solo viajan los
+fragmentos que la búsqueda consideró relevantes.
+
+| | RAG convencional | Motor DATABiQ |
+|---|---|---|
+| Índices | Uno por modalidad, o solo texto | **Una colección**; la modalidad va en el payload |
+| PDF | OCR: pierde diagramas y tablas | El encoder de visión **codifica la página como imagen** |
+| Audio | Hay que transcribirlo para buscarlo | El **audio mismo** es un vector comparable |
+| Preprocesamiento | Se paga por página y por minuto | **Ninguno**: se embebe en la modalidad original |
+| Dónde corre | Servicio de nube | **744M de parámetros en tu GPU**, ~1,5 GB de VRAM |
+| Cuando no sabe | Responde igual | **Se niega** y explica qué encontró |
+
+El motor de embeddings es [`google/embeddinggemma-2`](https://huggingface.co/google/embeddinggemma-2)
+(Apache 2.0). **El nombre del proyecto es Motor DATABiQ, no el del modelo**: el día que
+cambie el encoder, el proyecto sigue llamándose igual.
 
 ---
 
@@ -465,11 +490,16 @@ obligatorios, y la app lo exige con un error claro en vez de fallar en silencio.
 ## Estructura del proyecto
 
 ```
-Embedding_Gemma2/
+Motor_DATABiQ/
 ├── app.py                       Interfaz Streamlit (pregunta → respuesta → fuentes)
+├── LICENSE                      MIT
+├── SECURITY.md                  Qué sale del equipo y qué no, componente por componente
+├── CHANGELOG.md                 Qué cambió y cuándo, con las mediciones
+├── pyproject.toml               Configuración de pytest y ruff
+├── .github/workflows/ci.yml     La suite y el lint en cada push
 ├── requirements.txt             Dependencias verificadas contra PyPI
 ├── requirements-dev.txt         Solo para desarrollo: pytest
-├── .env.example                 Plantilla de configuración
+├── .env.example                 Plantilla de configuración (copia a `.env`)
 ├── conftest.py                  Aislamiento de Chroma y raíz importable
 ├── docs/                        El notebook de Colab del que nació el proyecto
 ├── bench/                       El banco de validación (ver *Línea base reproducible*)

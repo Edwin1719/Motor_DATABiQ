@@ -14,9 +14,10 @@ import pytest
 
 from src import config
 
-faltan = not (config.DATA_DIR / "esc50.csv").exists() or not (
-    config.DATA_DIR / "flickr_captions.csv"
-).exists()
+faltan = (
+    not (config.DATA_DIR / "esc50.csv").exists()
+    or not (config.DATA_DIR / "flickr_captions.csv").exists()
+)
 
 pytestmark = pytest.mark.skipif(faltan, reason="faltan los CSV demo: corre scripts/seed_demo.py")
 
