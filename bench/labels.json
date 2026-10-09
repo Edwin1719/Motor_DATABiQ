@@ -1,0 +1,17 @@
+{
+  "licencia": {
+    "tipo": "CC0-1.0 (material original generado por scripts/make_bench_corpus.py)",
+    "nota": "No procede de ningun dataset de terceros. Es regenerable bit a bit con la semilla fija del script, y se puede redistribuir sin condiciones."
+  },
+  "etiquetas": {
+    "audio/tono_440hz.wav": "Tono puro sostenido a 440 hercios, la nota La.",
+    "audio/tono_880hz.wav": "Tono puro sostenido a 880 hercios, una octava mas agudo.",
+    "audio/chirp_200_4000hz.wav": "Barrido de frecuencia ascendente de 200 a 4000 hercios.",
+    "audio/pulso_am_4hz.wav": "Tono con amplitud modulada a cuatro pulsos por segundo.",
+    "audio/silencio.wav": "Grabacion sin senal: silencio digital.",
+    "imagen/circulo_azul.png": "Un circulo azul relleno centrado sobre fondo blanco.",
+    "imagen/cuadrado_rojo.png": "Un cuadrado rojo relleno centrado sobre fondo blanco.",
+    "imagen/triangulo_verde.png": "Un triangulo verde equilatero sobre fondo blanco.",
+    "imagen/franjas_negras.png": "Franjas verticales negras y blancas a rayas."
+  }
+}

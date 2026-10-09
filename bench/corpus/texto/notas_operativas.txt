@@ -1,0 +1,5 @@
+Notas operativas
+
+El inventario del almacen se revisa los lunes y los jueves. El codigo interno de cada articulo empieza por la letra Z. Cuando falta existencias se avisa al responsable de compras antes del mediodia.
+
+Palabra de control de este documento: alcachofa.

@@ -1,0 +1,150 @@
+# =============================================================================
+#  EmbeddingGemma 2 — RAG multimodal (Chroma + Streamlit)
+# -----------------------------------------------------------------------------
+#  Python 3.14.8  ·  Windows x64  ·  RTX 4050 Laptop (Ada 8.9)  ·  CUDA 13.0
+#  Versiones verificadas contra PyPI y download.pytorch.org el 2026-10-07.
+#  Env validado: cuda_available=True y matmul en bfloat16 funcionando.
+#
+#  Instalación:
+#      conda create -n EmbeddingGemma2 python=3.14 -y   (3.12 también sirve)
+#      conda activate EmbeddingGemma2
+#      python -m pip install --upgrade pip
+#      pip install -r requirements.txt
+#
+#  Descarga total: ~4 GB (torch 1.99 GB + modelo 1.5 GB + resto ~0.5 GB)
+#
+#  Si ya tienes torch/torchvision en su variante +cpu, desinstalalos antes:
+#      pip uninstall -y torch torchvision
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+#  ÍNDICE EXTRA — solo para las builds CUDA de torch / torchvision
+# -----------------------------------------------------------------------------
+#  torch==2.14.1+cu130 no existe en PyPI, solo en el índice de PyTorch.
+#  Con --extra-index-url, pip busca en AMBOS: toma el +cu130 de aquí y el resto
+#  de paquetes de PyPI. (--index-url NO sirve aquí: reemplaza PyPI por completo
+#  y los demás paquetes fallarían al resolverse.)
+#
+#  >> ¿Prefieres CPU (~2 GB en vez de ~4 GB)? Comenta las líneas [CUDA]
+#     y descomenta las [CPU].
+--extra-index-url https://download.pytorch.org/whl/cu130
+# --extra-index-url https://download.pytorch.org/whl/cpu
+
+
+# -----------------------------------------------------------------------------
+#  NÚCLEO — motor de inferencia
+# -----------------------------------------------------------------------------
+#  OJO: PyPI ya solo publica torch CPU para Windows (0.12 GB, verificado
+#  2026-10-07). La build CUDA existe ÚNICAMENTE en download.pytorch.org, así
+#  que el --extra-index-url de arriba no es opcional: `pip install torch` a
+#  secas deja el entorno sin GPU, en silencio y sin ningún aviso.
+torch==2.14.1+cu130          # [CUDA] ~1.99 GB, trae cuBLAS + cuDNN embebidos
+# torch==2.14.1+cpu          # [CPU]  ~0.12 GB
+
+#  torchvision va SIEMPRE con el mismo build que torch. Si lo dejas resolver
+#  desde PyPI, pip baja la variante +cpu y en runtime falla con
+#  "PyTorch and torchvision were compiled with different CUDA versions".
+#  Llega por transformers[vision], dentro del extra [image,video] de abajo.
+torchvision==0.29.1+cu130    # [CUDA]
+# torchvision==0.29.1+cpu    # [CPU]
+
+
+# -----------------------------------------------------------------------------
+#  MODELO DE EMBEDDINGS — un espacio de 768 dims para texto / imagen / audio
+# -----------------------------------------------------------------------------
+#  sentence-transformers 6.1.0 exige transformers>=5.0.0,<6.0.0 y torch>=2.2.
+#  El extra [image,video] jala transformers[vision] + transformers[video].
+#
+#  NUNCA agregues el extra [audio]: jala transformers[audio] -> pyctcdecode,
+#  que fija numpy<2, intenta compilar desde fuente y falla en Python 3.12+.
+#  Para audio, librosa + soundfile son suficientes.
+sentence-transformers[image,video]==6.1.0
+transformers==5.19.0         # última disponible; el modelo salió el 2026-10-06
+numpy>=2.1.0                 # guarda: bloquea el numpy<2 que arrastraría pyctcdecode
+
+
+# -----------------------------------------------------------------------------
+#  BASE DE DATOS VECTORIAL
+# -----------------------------------------------------------------------------
+chromadb==1.5.9              # wheel abi3 (cp39+): sirve en Python 3.12, 3.13 y 3.14
+
+
+# -----------------------------------------------------------------------------
+#  FRONTEND
+# -----------------------------------------------------------------------------
+streamlit==1.65.0
+
+
+# -----------------------------------------------------------------------------
+#  MULTIMODAL — imágenes
+# -----------------------------------------------------------------------------
+pillow==12.3.0
+
+
+# -----------------------------------------------------------------------------
+#  MULTIMODAL — audio (16 kHz mono; el encoder lo proyecta al espacio compartido)
+# -----------------------------------------------------------------------------
+#  OJO (medido el 2026-10-09): librosa 1.0.0 NO importa en Python 3.14. Su import
+#  perezoso de `librosa.core.notation` falla con
+#  "RuntimeError: cannot cache function '__o_fold': no locator available".
+#  La ingesta de audio YA NO depende de ella: decodifica `soundfile` y remuestrea
+#  `scipy.signal.resample_poly` (ver src/ingest.py y src/embedder.py). Se conserva
+#  solo como respaldo por formato, y porque sigue arrastrando numba.
+librosa==1.0.0               # rota en Python 3.14: NO usar en la ruta crítica
+scipy                        # remuestreo de audio; ya llega con el entorno
+soundfile==0.14.0            # wheel puro; lee WAV / FLAC / MP3 / OGG
+
+#  Transcripción local, para que un audio sea RESPONDIBLE y no solo encontrable.
+#  Añade una sola dependencia nueva —ctranslate2—: av, tokenizers, onnxruntime,
+#  huggingface-hub y tqdm ya vienen con lo de arriba. Verificado el 2026-10-07:
+#  ctranslate2 4.8.2 publica wheel cp314-win_amd64, así que no compila desde fuente.
+#  (Ollama NO sirve para transcribir: su API solo acepta `audio` en /api/embed.)
+#  La primera transcripción descarga el modelo de Whisper (~460 MB con `small`).
+faster-whisper==1.2.1
+
+
+# -----------------------------------------------------------------------------
+#  MULTIMODAL — PDF (cada página renderizada a imagen, sin OCR)
+# -----------------------------------------------------------------------------
+PyMuPDF==1.28.2
+
+
+# -----------------------------------------------------------------------------
+#  APP Y UTILIDADES
+# -----------------------------------------------------------------------------
+pandas                       # tablas de metadatos y resultados
+python-dotenv==1.2.4         # .env como única fuente de verdad
+
+
+# -----------------------------------------------------------------------------
+#  CAPA DE GENERACIÓN (OPCIONAL)
+# -----------------------------------------------------------------------------
+#  Cliente compatible con OpenAI, apuntado a DeepSeek vía AI_MODEL_BASE_URL.
+#  Si no defines DEEPSEEK_API_KEY en .env, la app funciona igual en modo
+#  solo-recuperación: sin LLM y sin llamadas externas.
+openai==3.26.0
+
+
+# -----------------------------------------------------------------------------
+#  VIDEO (ACTIVO — decodificación de fotogramas)
+# -----------------------------------------------------------------------------
+#  El modelo NO tiene encoder de video: mira fotogramas al encoder de visión a
+#  1 fps (ficha oficial). Los decodifica PyAV, que trae FFmpeg EMBEBIDO, así que
+#  NO hace falta instalar ffmpeg en el sistema ni torchcodec.
+#
+#  Por qué no la vía nativa: `VideoProcessorMixin.fetch_videos()` de transformers
+#  fuerza backend="torchcodec" y, sin él, cae a torchvision — donde `read_video`
+#  se eliminó en 0.26 (aquí hay 0.29.1). Al entregarle los fotogramas YA
+#  decodificados, `load_video()` sale temprano y no pide ningún backend.
+#
+#  Se declara EXPLÍCITAMENTE aunque hoy llegue de rebote por faster-whisper:
+#  depender de una dependencia transitiva se rompe el día que esa librería
+#  cambie la suya, y el video dejaría de funcionar sin ningún aviso.
+av==19.0.1
+
+
+# -----------------------------------------------------------------------------
+#  VOZ DE PRUEBA (OPCIONAL — solo para generar clips sintéticos en el demo)
+# -----------------------------------------------------------------------------
+# gTTS==2.5.4

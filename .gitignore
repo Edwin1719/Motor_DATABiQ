@@ -1,0 +1,54 @@
+# =============================================================================
+#  .gitignore — lo que NUNCA debe llegar al repositorio.
+#
+#  Tres de estas reglas no son comodidad, son seguridad. Estan marcadas con [!!].
+# =============================================================================
+
+# --- [!!] Credenciales y secretos --------------------------------------------
+# .env contiene la DEEPSEEK_API_KEY. Si entra al repo, la clave es publica en el
+# historial de git y rotarla no basta: hay que reescribir el historial.
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# --- [!!] Datos del usuario --------------------------------------------------
+# Los documentos indexados NO son del proyecto: son del usuario. Publicarlos seria
+# filtrar su informacion, y ademas inflaria el repo con cientos de megas.
+data/
+
+# --- [!!] Indice vectorial ---------------------------------------------------
+# Se regenera indexando. Puede contener el texto integro de los documentos.
+chroma_db/
+# El indice del banco de validacion se regenera con `python scripts/bench.py`.
+# El corpus y las consultas SI se versionan: sin ellos no hay medicion.
+bench/.index/
+bench/resultado*.json
+
+# --- Estado de herramientas --------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# --- Entornos virtuales ------------------------------------------------------
+# Las dependencias se reinstalan con requirements.txt; no se versionan.
+.venv/
+venv/
+env/
+
+# --- Sistema operativo y editores --------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp

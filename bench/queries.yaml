@@ -1,0 +1,100 @@
+# Banco de validación del RAG. Un archivo de datos, no de código: se edita sin tocar Python.
+#
+# Reglas de esta lista:
+#   - `esperado` es el nombre exacto del archivo (campo `name` del metadata), no la ruta.
+#     La respuesta la conoce quien escribe la consulta: si no sabes qué archivo debería
+#     salir, la consulta no sirve para medir.
+#   - `modalidad` comprueba además que el acierto venga de la modalidad correcta.
+#   - Las `negativas` no esperan un archivo: esperan que NADA destaque. Se evaluan
+#     comparando su mejor similitud contra la peor de las positivas.
+#
+# Formato: lista de bloques separados por "- ". Los valores con ":" se cortan en el
+# primer ":" y se limpian las comillas. No es YAML completo, es lo que este archivo usa.
+
+positivas:
+
+- id: audio_tono_440
+  query: hay un tono a 440 hercios
+  esperado: tono_440hz.wav
+  modalidad: audio
+
+- id: audio_chirp
+  query: tienes algun barrido de frecuencia ascendente
+  esperado: chirp_200_4000hz.wav
+  modalidad: audio
+
+- id: audio_silencio
+  query: hay alguna grabacion sin senal o silencio
+  esperado: silencio.wav
+  modalidad: audio
+
+- id: audio_pulso
+  query: un tono que pulsa cuatro veces por segundo
+  esperado: pulso_am_4hz.wav
+  modalidad: audio
+
+- id: imagen_circulo
+  query: una forma geometrica circular de color azul
+  esperado: circulo_azul.png
+  modalidad: image
+
+- id: imagen_cuadrado
+  query: un cuadrado rojo relleno
+  esperado: cuadrado_rojo.png
+  modalidad: image
+
+- id: imagen_triangulo
+  query: un triangulo verde
+  esperado: triangulo_verde.png
+  modalidad: image
+
+- id: imagen_franjas
+  query: rayas verticales en blanco y negro
+  esperado: franjas_negras.png
+  modalidad: image
+
+- id: doc_factura_vencimiento
+  query: cuando vence el pago de la factura
+  esperado: factura_2024.pdf
+  modalidad: text
+
+- id: doc_factura_numero
+  query: numero de factura FA-2024-0517
+  esperado: factura_2024.pdf
+  modalidad: text
+
+- id: doc_informe_dureza
+  query: que dureza se midio en la muestra
+  esperado: informe_tecnico.pdf
+  modalidad: text
+
+- id: doc_acta_responsable
+  query: quien sera responsable de la migracion del sistema financiero
+  esperado: acta_reunion.pdf
+  modalidad: text
+
+- id: texto_alcachofa
+  query: que palabra de control tiene el documento de notas del almacen
+  esperado: notas_operativas.txt
+  modalidad: text
+
+- id: texto_ingles_marmalade
+  query: what is the control word in the technical notes
+  esperado: technical_notes.txt
+  modalidad: text
+
+- id: texto_cache_por_version
+  query: como evita el pipeline preparar dos veces un archivo que no cambio
+  esperado: technical_notes.txt
+  modalidad: text
+
+negativas:
+
+- id: neg_capital_francia
+  query: cual es la capital de Francia
+
+- id: neg_receta_cocina
+  query: dame una receta de tortilla de patatas
+
+- id: neg_clima_manana
+  query: va a llover manana en Pereira

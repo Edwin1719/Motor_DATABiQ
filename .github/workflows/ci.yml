@@ -1,0 +1,60 @@
+name: tests
+
+# La suite se corre en cada push y en cada pull request. Sin esto, el banco de
+# validacion del README es una promesa: nadie comprueba que sigue midiendo lo mismo.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: pytest · Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.12 es el minimo declarado en pyproject; 3.13 es el entorno real del proyecto.
+        # 3.14 se anade cuando `pytest` y `chromadb` lo soporten sin friccion.
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Instalar dependencias de desarrollo
+        # A proposito NO se instala requirements.txt: son ~4 GB (torch CUDA + el modelo)
+        # y la mayoria de los tests no los necesitan. El tokenizer de transformers se
+        # instala aparte porque `test_embedder` lo importa.
+        #
+        # Ningun test descarga el modelo de 1,5 GB: los que lo exigirian estan excluidos
+        # por diseno (ver "Que NO se testea" en el README).
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install "transformers>=5.0.0,<6.0.0" "numpy>=2.1.0"
+
+      - name: Tests
+        run: pytest -v
+
+      - name: Comprobar que el corpus del banco esta presente
+        # El corpus es generado por codigo y SI se versiona: si desaparece, el banco
+        # mediria cero y el README mentiria sin que nada fallara.
+        run: python scripts/make_bench_corpus.py
+
+  lint:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .

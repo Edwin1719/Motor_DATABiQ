@@ -1,0 +1,20 @@
+# Normaliza los finales de línea: un `\n` en el repositorio, el nativo en el disco.
+# Sin esto, un commit desde Windows reescribe el proyecto entero.
+* text=auto eol=lf
+
+# El corpus del banco es generado por código, pero sus binarios son idénticos en cada
+# plataforma y no deben tratarse como texto.
+*.wav binary
+*.png binary
+*.pdf binary
+*.mp3 binary
+*.mp4 binary
+
+# Ruido de diffs: el corpus se regenera con `scripts/make_bench_corpus.py`.
+bench/corpus/** linguist-generated=true
+
+# Archivos de configuración de herramientas.
+*.yml  text
+*.yaml text
+*.toml text
+*.md   text

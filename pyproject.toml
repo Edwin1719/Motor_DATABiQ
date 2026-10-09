@@ -1,0 +1,64 @@
+[project]
+name = "embeddinggemma2-mmrag"
+version = "0.1.0"
+description = "RAG multimodal local-first: una sola colección de 768 dimensiones para texto, imagen, audio, PDF y video"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+keywords = ["rag", "multimodal", "embeddings", "local-first", "chroma", "streamlit"]
+classifiers = [
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Las dependencias viven en requirements.txt a proposito: incluyen el indice extra de
+# PyTorch para las builds CUDA, que `project.dependencies` no puede expresar sin romper
+# la instalacion en CPU. Este pyproject existe para las herramientas.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/USUARIO/Embedding_Gemma2"
+
+# ----------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+# Los tests viven aqui y solo aqui: un `pytest` a secas no debe recoger el corpus del
+# banco ni los scripts.
+testpaths = ["tests"]
+addopts = "-q"
+# Permite importar `src` y los modulos de `scripts/` sin instalar el paquete.
+pythonpath = ["."]
+filterwarnings = [
+  # Chroma avisa de un `asyncio.iscoroutinefunction` deprecado en su telemetria.
+  # No es accionable desde aqui y ensucia la salida de cada corrida.
+  "ignore::DeprecationWarning:chromadb.*",
+]
+
+# ------------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+# El proyecto corre en 3.14, pero se declara 3.12 para no exigir la ultima version de
+# ruff a quien colabore. La sintaxis usada es compatible con ambas.
+target-version = "py312"
+exclude = ["docs", "bench/corpus"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # errores de estilo de pycodestyle
+  "F",   # pyflakes: codigo muerto, imports sin usar, nombres indefinidos
+  "I",   # orden de imports
+  "UP",  # sintaxis obsoleta para la version objetivo
+  "B",   # bugs comunes (flake8-bugbear)
+  "SIM", # simplificaciones
+]
+ignore = [
+  # Las lineas largas de los docstrings y tablas del README se leen mejor sin partir.
+  "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Los tests pueden tener imports dentro de las funciones a proposito: asi cargan el
+# modelo solo quien lo necesita y la suite rapida no paga 1,5 GB.
+"tests/*" = ["E402"]
+"scripts/*" = ["E402"]

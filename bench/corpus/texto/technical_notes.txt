@@ -1,0 +1,5 @@
+Technical notes
+
+The pipeline decodes media in three stages. Each stage keeps a cache keyed by the file version, so an unchanged asset is never prepared twice.
+
+Control word for this document: marmalade.

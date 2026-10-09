@@ -1,0 +1,8 @@
+# Dependencias solo para desarrollo y tests.
+# No hacen falta para ejecutar la aplicación.
+#
+#     pip install -r requirements-dev.txt
+#     pytest -q
+#
+# Version verificada contra PyPI el 2026-10-07 (requiere Python >= 3.10).
+pytest==9.1.1
