@@ -5,7 +5,26 @@ Versionado [semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Corregido
+
+- **El README se contradecía con el LICENSE.** Decía *"Licencia del código de este
+  proyecto: por definir por el autor"* en la última línea, cuando el repositorio ya
+  publicaba una **MIT**. Ahora la declara, y aclara que los pesos del modelo (Apache 2.0) y
+  los datos de ejemplo del corpus histórico tienen licencia aparte.
+- **Sección `Qué lo hace distinto` duplicada**, con dos tablas distintas. Unificada en la
+  cabecera, con la fila que solo estaba en la segunda (producto punto frente a coseno).
+- **El conteo de tests decía 154 y eran 159** — y ya había quedado obsoleto tres veces
+  (145 → 154 → 159) mientras se construía este mismo banco. Se elimina el número fijo: el
+  README remite a `pytest --collect-only -q`. Una cifra que caduca sin que nadie la revise
+  es exactamente el problema que este documento combate.
+- **"Dos pestañas"** en la puesta en marcha, cuando la app tiene tres desde que existe la
+  de Métricas.
+- Texto alternativo de la imagen de cabecera, que era el marcador por defecto de GitHub.
+
 ### Añadido
+
+- Badge de CI en la cabecera, apuntando al workflow real del repositorio.
+
 
 - **`bench/` — banco de validación reproducible.** Corpus semilla **CC0 generado por
   código** (14 ítems: 5 audio, 4 imagen, 3 documento, 2 texto), consultas con respuesta

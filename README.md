@@ -4,7 +4,7 @@
 fotografías, notas de voz y videos en una sola memoria semántica que responde en lenguaje
 natural, **cita de dónde lo sacó** y **se niega cuando no lo sabe**.
 
-![texto del vínculo](https://weaviate.io/assets/images/hero-e3172d1fe79d9fab2e591bbb8b769ce3.png)
+![Mapa del sistema: cinco modalidades entrando a un único índice vectorial](https://weaviate.io/assets/images/hero-e3172d1fe79d9fab2e591bbb8b769ce3.png)
 
 Convierte PDFs, fotos, audios y videos en una memoria consultable: **un solo índice
 vectorial, cero OCR, todo en tu equipo.**
@@ -38,6 +38,7 @@ fragmentos que la búsqueda consideró relevantes.
 | PDF | OCR: pierde diagramas y tablas | El encoder de visión **codifica la página como imagen** |
 | Audio | Hay que transcribirlo para buscarlo | El **audio mismo** es un vector comparable |
 | Preprocesamiento | Se paga por página y por minuto | **Ninguno**: se embebe en la modalidad original |
+| Distancia | Coseno | **Producto punto** (`ip`): los vectores ya son unitarios, es idéntico y más rápido |
 | Dónde corre | Servicio de nube | **744M de parámetros en tu GPU**, ~1,5 GB de VRAM |
 | Cuando no sabe | Responde igual | **Se niega** y explica qué encontró |
 
@@ -82,16 +83,6 @@ fotografías de campo— queda fuera del alcance del asistente.
 
 Este proyecto extrae esa conversión del pipeline: **el contenido se embebe en su modalidad
 original** y se compara en un espacio común.
-
-## Qué lo hace distinto
-
-| RAG convencional | Este proyecto |
-|---|---|
-| Un índice por modalidad, o solo texto | **Una colección** para todo; la modalidad va en el payload |
-| OCR para leer PDFs | El encoder de visión **codifica la página como imagen** — sin OCR, sin extraer texto |
-| Transcribir audio a texto para poder buscarlo | El **audio mismo** es un vector comparable |
-| Distancia coseno | **Producto punto** (`ip`): los vectores ya son unitarios, es idéntico y más rápido |
-| Modelo de embeddings en la nube | **744M parámetros en local**: ~1,5 GB de VRAM, los datos no salen del equipo |
 
 ## Arquitectura
 
@@ -456,8 +447,10 @@ python scripts/seed_demo.py --images 20
 REM 2) interfaz
 streamlit run app.py
 
-REM    Dos pestañas: Preguntar (respuesta citada) y Recuperar (el ranking con sus
-REM    similitudes y el Top-K ajustable, sin capa de generación ni gasto de tokens)
+REM    Tres pestañas:
+REM      Preguntar  respuesta citada (necesita el LLM y paga los tokens)
+REM      Recuperar  el ranking con sus similitudes y el Top-K ajustable, sin LLM
+REM      Métricas   el índice medido, los textos para revisar y el consumo
 ```
 
 La primera ejecución descarga el modelo **`google/embeddinggemma-2`** (~1,5 GB en bfloat16)
@@ -507,7 +500,7 @@ Motor_DATABiQ/
 │   ├── labels.json              Texto con el que se embebe cada ítem + su licencia
 │   ├── queries.yaml             Consultas con respuesta conocida y negativas
 │   └── .index/                  Índice del banco, aparte del de trabajo (ignorado por git)
-├── tests/                       La suite de regresión (154 tests, 4 se saltan)
+├── tests/                       La suite de regresión (cuéntalos con `pytest --collect-only -q`)
 │   ├── test_store.py            ⭐ Distancia→similitud, espacio ip, filtro, conteos
 │   ├── test_ingest.py           Representación dual, normalización de imágenes, fragmentado
 │   ├── test_video.py            Fragmentado, muestreo a 1 fps, reescalado y audio del video
@@ -541,9 +534,14 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-**154 tests: 150 pasan y 4 se saltan, en ~32 s.** No buscan cobertura decorativa: protegen
-las **cosas del sistema que fallan en silencio**, es decir las que nadie notaría hasta que
-un usuario recibiera una respuesta peor sin saber por qué.
+**Se saltan 4, y el resto pasan en ~30 s.** No se escribe aquí el total a propósito: este
+número ha quedado obsoleto tres veces mientras se construía el banco, y una cifra que
+caduca sin que nadie la revise es exactamente el problema que este README combate. Para
+verlo: `pytest --collect-only -q`.
+
+Los tests no buscan cobertura decorativa: protegen las **cosas del sistema que fallan en
+silencio**, es decir las que nadie notaría hasta que un usuario recibiera una respuesta peor
+sin saber por qué.
 
 | Qué protege | Test | Qué pasaría sin él |
 |---|---|---|
@@ -714,8 +712,10 @@ muestras a 16 kHz). Hay 7 tests protegiendo las dos puertas del parche y los dos
 
 ### Cómo re-validar tras cualquier cambio
 
-**Primer nivel, automático.** `pytest -q` corre los 141 tests de lógica en ~22 s, sin
+**Primer nivel, automático.** `pytest -q` corre la suite de lógica en ~30 s, sin
 modelo ni red. Si algo del andamiaje se rompe, el test lo dice antes que un usuario.
+Y desde el 2026-10-09 hay un tercer nivel: `scripts/bench.py`, que mide la **calidad de
+recuperación** y falla si Recall@3 baja del umbral.
 
 **Segundo nivel, comportamiento.** Con **tus** archivos y el método de *Validación
 funcional*: una pregunta por modalidad cuya respuesta ya conozcas. Dos comprobaciones no
@@ -761,4 +761,7 @@ recupera**, nunca tuvo capa de generación, y la aparente «visión» de sus fot
 **Interfaz:** [Streamlit](https://streamlit.io/) 1.65.0.
 **Generación opcional:** [DeepSeek](https://www.deepseek.com/) vía API compatible con OpenAI.
 
-**Licencia del código de este proyecto:** por definir por el autor.
+**Licencia del código de este proyecto:** [MIT](LICENSE). Puedes usarlo, modificarlo y
+distribuirlo, también comercialmente, conservando el aviso de copyright. **Los pesos del
+modelo tienen su propia licencia** (Apache 2.0), y los datos de ejemplo del *corpus demo
+histórico* su licencia aparte — ver el aviso de la tabla de arriba.
