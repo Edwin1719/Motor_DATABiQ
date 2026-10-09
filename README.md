@@ -4,7 +4,7 @@
 espacio vectorial de 768 dimensiones.** Una sola colección, una sola consulta, todas las
 modalidades en el mismo ranking.
 
-![texto del vínculo](https://www.shutterstock.com/image-photo/online-education-concept-2020-banner-260nw-1734035627.jpg)
+![texto del vínculo](https://weaviate.io/assets/images/hero-e3172d1fe79d9fab2e591bbb8b769ce3.png)
 
 
 **Un motor de conocimiento empresarial multimodal, económico y local-first**, capaz de
